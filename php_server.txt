@@ -1,0 +1,56 @@
+<?php
+$server = "tcp:ab4lshxb26.database.windows.net, 1433"; //server address: "tcp:SERVER ADDRESS, PORT"
+$user = "tuomas@ab4lshxb26"; //server username
+$pwd = "Sahkopaja1"; //server password
+$db = "testiDatabase"; //database name
+ 
+//connect to database with these credentials
+$conn = sqlsrv_connect($server, array("UID"=>$user, "PWD"=>$pwd, "Database"=>$db));
+ 
+//get ID from the URL argument "getID"
+//Example:                                      vvvvv
+//http://phptesting.azurewebsites.net/testi.php?getID=123456789
+ 
+if ($_GET) {
+    $getID = $_GET['getID']; //store argument in "$getID"
+}
+ 
+//check connection to the database
+if($conn === false){
+echo('CONN_FA ');
+}
+else{
+echo "CONN_OK ";
+}
+ 
+$sql = "SELECT * FROM RegistrationTbl WHERE ID = $getID "; //find every/any item from table under the ID
+ 
+$result = sqlsrv_query( $conn, $sql); //get query from SQL table
+ 
+if( sqlsrv_fetch($result) == true ) { //if the query was succesful
+echo "ID_OK";
+//$name = sqlsrv_get_field( $result, 0); //you can retrieve info from table under the ID using this
+ 
+/*This can be used to get specific error data
+    if( ($errors = sqlsrv_errors() ) != null) {
+        foreach( $errors as $error ) {
+            echo "SQLSTATE: ".$error[ 'SQLSTATE']."<br />";
+            echo "code: ".$error[ 'code']."<br />";
+            echo "message: ".$error[ 'message']."<br />";
+        }
+        }
+    */
+}
+else //nothing found
+{
+echo "ID_NF";
+}
+ 
+//add the ID to logging table
+$sql = "INSERT INTO LogTable3 (ID) VALUES ($getID) "; //set query
+sqlsrv_query($conn,$sql); //execute query
+ 
+//close connections
+sqlsrv_free_stmt( $result);
+sqlsrv_close( $conn);
+?>
